@@ -127,11 +127,9 @@ pipeline{
             steps{
                 script{
 
-                    sh """
-                    cat app-deployment.yaml
-                    sed -i 's/${APP_NAME}.*/${APP_NAME}:${IMAGE_TAG}/g' app-deployment.yaml
-                    cat app-deployment.yaml
-                    """
+                    sh "sed -i 's/image: ${DOCKERHUB_USERNAME}\\/${APP_NAME}:.*/image: ${DOCKERHUB_USERNAME}\\/${APP_NAME}:${IMAGE_TAG}/' app-deployment.yaml"
+                    // Verify the file update (optional)
+                    sh "cat app-deployment.yaml"
                 }
             }
         }
