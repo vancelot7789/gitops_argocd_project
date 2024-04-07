@@ -113,5 +113,55 @@ pipeline{
             }
         }
 
+        stage('Checkout Deployment Code') {
+            steps {
+                // Checkout the deployment scripts repository
+                git credentialsId: 'github',
+                url: 'https://github.com/vancelot7789/gitops_argocd_project.git',
+                branch: 'main'
+            }
+        }
+        stage('Update Deployment Configurations') {
+            steps {
+                // Update the deployment configurations to use the new Docker image
+                sh """
+                    cat deployment.yml
+                    sed -i 's/${APP_NAME}.*/${APP_NAME}:${IMAGE_TAG}/g' deployment.yml
+                    cat deployment.yml
+                    """
+
+            }
+        }
+
+        stage('Updating kubernetes deployment file'){
+            steps{
+                script{
+
+                    sh """
+                    cat deployment.yml
+                    sed -i 's/${APP_NAME}.*/${APP_NAME}:${IMAGE_TAG}/g' app-deployment.yml
+                    cat app-deployment.yml
+                    """
+                }
+            }
+        }
+
+        stage('Push the changed deployment file to Git'){
+            steps{
+                script{
+                    sh """
+                      git config --global user.name "vancelot7789"
+                      git config --global user.email "a0952072007@gmail.com"
+                      git add app-deployment.yml
+                      git commit -m "updated the app-deployment file"
+                    """
+                    withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]) {
+
+                    sh "git push https://github.com/vancelot7789/gitops_argocd_project.git main"
+                  }
+                }
+            }
+        }
+
     }
 }

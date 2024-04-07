@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pokemon-auth-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pokemon-auth-app
+  template:
+    metadata:
+      labels:
+        app: pokemon-auth-app
+    spec:
+      initContainers:
+      - name: wait-for-db
+        image: postgres
+        command: ['sh', '-c',
+                  'until pg_isready -h pokemon-auth-db-service -p 5432 -U bbchang; 
+                    do echo waiting for database; sleep 2; done;'
+                  ]
+      containers:
+      - name: pokemon-auth-app
+        image: vancelot7789/gitops-argo-app:v1
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://pokemon-auth-db-service:5432/pokemontest"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "bbchang"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "changemeinprod!"
+
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pokemon-auth-app-service
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30001
+  selector:
+    app: pokemon-auth-app
+  type: NodePort
