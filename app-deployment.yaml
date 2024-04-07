@@ -21,7 +21,7 @@ spec:
                   ]
       containers:
       - name: pokemon-auth-app
-        image: vancelot7789/gitops-argo-app:17
+        image: vancelot7789/gitops-argo-app:20
         ports:
         - containerPort: 8080
         env:
