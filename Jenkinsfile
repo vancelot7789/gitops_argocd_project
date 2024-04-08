@@ -74,15 +74,16 @@ pipeline{
 
         stage('Build') {
             steps {
-                sh './mvnw clean package' // Adjust Maven command to compile without testing
+                sh './mvnw clean package -Dspring.profiles.active=test' // Adjust Maven command to compile without testing
             }
         }
 
         stage('Test') {
             steps {
-                sh './mvnw test' // Run tests without compiling
+                sh './mvnw test -Dspring.profiles.active=test' // Run tests without compiling
             }
         }
+
 
         stage('Build Docker Image'){
             steps{
